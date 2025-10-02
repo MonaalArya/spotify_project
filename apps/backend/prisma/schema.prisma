@@ -1,3 +1,4 @@
+
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
@@ -13,3 +14,171 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+
+// ---------------- Models ----------------
+
+// Users
+model User {
+  user_id        Int       @id @default(autoincrement())
+  user_name      String
+  email          String    @unique
+  password_hash  String
+  followers      Int
+  following      Int
+  profile_pic_url String?
+  is_verified    Boolean   @default(false)
+  created_at     DateTime  @default(now())
+  updated_at     DateTime  @updatedAt
+
+  // relations
+  playlists      Playlist[]
+  userAlbums     UserAlbum[]
+  following_rel  Follow[]   @relation("following")
+  followers_rel  Follow[]   @relation("followers")
+  userPlaylists  UserPlaylist[]
+  songArtists    SongArtist[]
+}
+
+// Songs
+model Song {
+  song_id     Int       @id @default(autoincrement())
+  song_name   String
+  song_duration Int
+  song_hash   String
+  lyrics      String?
+  album_id    Int?
+  timestamp   DateTime?
+  file_name   String?
+  file_size   Int?
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
+
+  album       Album?      @relation(fields: [album_id], references: [album_id])
+  genres      SongGenre[]
+  songArtists SongArtist[]
+  albumSongs  AlbumSong[]
+  playlistSongs PlaylistSong[]
+}
+
+// Genres
+model Genre {
+  genre_id    Int        @id @default(autoincrement())
+  genre_name  String
+
+  songs       SongGenre[]
+}
+
+model SongGenre {
+  song_id   Int
+  genre_id  Int
+
+  song  Song  @relation(fields: [song_id], references: [song_id])
+  genre Genre @relation(fields: [genre_id], references: [genre_id])
+
+  @@id([song_id, genre_id])
+}
+
+// Albums
+model Album {
+  album_id   Int       @id @default(autoincrement())
+  artist_id  Int
+  title      String
+  release_date DateTime
+  cover_url  String?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  songs      Song[]
+  albumSongs AlbumSong[]
+  userAlbums UserAlbum[]
+}
+
+// AlbumSongs (junction with track num, added_at)
+model AlbumSong {
+  album_id   Int
+  song_id    Int
+  track_num  Int
+  added_at   DateTime @default(now())
+
+  album Album @relation(fields: [album_id], references: [album_id])
+  song  Song  @relation(fields: [song_id], references: [song_id])
+
+  @@id([album_id, song_id])
+}
+
+// SongArtists (junction for collabs)
+model SongArtist {
+  song_id   Int
+  artist_id Int
+
+  song  Song @relation(fields: [song_id], references: [song_id])
+  user  User @relation(fields: [artist_id], references: [user_id])
+
+  @@id([song_id, artist_id])
+}
+
+// Follows
+model Follow {
+  followed_id Int
+  follower_id Int
+  timestamp   DateTime @default(now())
+
+  followed User @relation("followers", fields: [followed_id], references: [user_id])
+  follower User @relation("following", fields: [follower_id], references: [user_id])
+
+  @@id([followed_id, follower_id])
+}
+
+// UserAlbums (junction for saved albums)
+model UserAlbum {
+  user_id  Int
+  album_id Int
+
+  user  User  @relation(fields: [user_id], references: [user_id])
+  album Album @relation(fields: [album_id], references: [album_id])
+
+  @@id([user_id, album_id])
+}
+
+// Playlists
+model Playlist {
+  playlist_id   Int      @id @default(autoincrement())
+  owner_id      Int
+  playlist_name String
+  description   String?
+  playlist_likes Int
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+
+  owner         User @relation(fields: [owner_id], references: [user_id])
+  playlistSongs PlaylistSong[]
+  userPlaylists UserPlaylist[]
+}
+
+// PlaylistSongs (junction with position, added_at)
+model PlaylistSong {
+  playlist_id Int
+  song_id     Int
+  position    Int
+  added_at    DateTime @default(now())
+
+  playlist Playlist @relation(fields: [playlist_id], references: [playlist_id])
+  song     Song     @relation(fields: [song_id], references: [song_id])
+
+  @@id([playlist_id, song_id])
+}
+
+// UserPlaylists (junction for likes/private)
+model UserPlaylist {
+  user_id     Int
+  playlist_id Int
+  is_liked    Boolean
+  is_private  Boolean
+
+  user     User     @relation(fields: [user_id], references: [user_id])
+  playlist Playlist @relation(fields: [playlist_id], references: [playlist_id])
+
+  @@id([user_id, playlist_id])
+}
+
