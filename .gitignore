@@ -3,3 +3,7 @@ node_modules
 
 # ENV files
 .ENV
+
+#compiled folders
+/apps/backend/generated/
+/apps/backend/dist
