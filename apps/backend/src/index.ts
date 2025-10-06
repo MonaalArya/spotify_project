@@ -1,16 +1,15 @@
-import express, { Request, Response } from "express";
-import path from "path";
-import dotenv from "dotenv";
+import app from "./app";
+import { ENV } from "./config/env";
 
-dotenv.config({ path: path.resolve(__dirname, "../../../.env") });
+const PORT = ENV.PORT || 8000;
 
-const app = express();
-const PORT = process.env.PORT || 8000;
-
-app.get("/", (req: Request, res: Response) => {
-  res.send("Hello, world!");
+process.on("SIGINT", async () => {
+  console.log(`SIGINT received: Closing connections`);
+  process.exit(0);
 });
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`Server running at PORT: ${PORT}`);
 });
+
+export { server };
