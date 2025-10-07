@@ -1,4 +1,3 @@
-
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
@@ -15,63 +14,62 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
 // ---------------- Models ----------------
 
 // Users
 model User {
-  user_id        Int       @id @default(autoincrement())
-  user_name      String
-  email          String    @unique
-  password_hash  String
-  followers      Int
-  following      Int
+  user_id         Int      @id @default(autoincrement())
+  user_name       String   @unique
+  email           String   @unique
+  password_hash   String
+  followers       Int
+  following       Int
   profile_pic_url String?
-  is_verified    Boolean   @default(false)
-  created_at     DateTime  @default(now())
-  updated_at     DateTime  @updatedAt
+  is_verified     Boolean  @default(false)
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
 
   // relations
-  playlists      Playlist[]
-  userAlbums     UserAlbum[]
-  following_rel  Follow[]   @relation("following")
-  followers_rel  Follow[]   @relation("followers")
-  userPlaylists  UserPlaylist[]
-  songArtists    SongArtist[]
+  playlists     Playlist[]
+  userAlbums    UserAlbum[]
+  following_rel Follow[]       @relation("following")
+  followers_rel Follow[]       @relation("followers")
+  userPlaylists UserPlaylist[]
+  songArtists   SongArtist[]
 }
 
 // Songs
 model Song {
-  song_id     Int       @id @default(autoincrement())
-  song_name   String
+  song_id       Int       @id @default(autoincrement())
+  song_name     String
   song_duration Int
-  song_hash   String
-  lyrics      String?
-  album_id    Int?
-  timestamp   DateTime?
-  file_name   String?
-  file_size   Int?
-  created_at  DateTime  @default(now())
-  updated_at  DateTime  @updatedAt
+  song_hash     String
+  lyrics        String?
+  album_id      Int?
+  timestamp     DateTime?
+  file_name     String?
+  file_size     Int?
+  created_at    DateTime  @default(now())
+  updated_at    DateTime  @updatedAt
 
-  album       Album?      @relation(fields: [album_id], references: [album_id])
-  genres      SongGenre[]
-  songArtists SongArtist[]
-  albumSongs  AlbumSong[]
+  album         Album?         @relation(fields: [album_id], references: [album_id])
+  genres        SongGenre[]
+  songArtists   SongArtist[]
+  albumSongs    AlbumSong[]
   playlistSongs PlaylistSong[]
 }
 
 // Genres
 model Genre {
-  genre_id    Int        @id @default(autoincrement())
-  genre_name  String
+  genre_id   Int    @id @default(autoincrement())
+  genre_name String
 
-  songs       SongGenre[]
+  songs SongGenre[]
 }
 
 model SongGenre {
-  song_id   Int
-  genre_id  Int
+  song_id  Int
+  genre_id Int
 
   song  Song  @relation(fields: [song_id], references: [song_id])
   genre Genre @relation(fields: [genre_id], references: [genre_id])
@@ -81,13 +79,13 @@ model SongGenre {
 
 // Albums
 model Album {
-  album_id   Int       @id @default(autoincrement())
-  artist_id  Int
-  title      String
+  album_id     Int      @id @default(autoincrement())
+  artist_id    Int
+  title        String
   release_date DateTime
-  cover_url  String?
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
+  cover_url    String?
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
 
   songs      Song[]
   albumSongs AlbumSong[]
@@ -96,10 +94,10 @@ model Album {
 
 // AlbumSongs (junction with track num, added_at)
 model AlbumSong {
-  album_id   Int
-  song_id    Int
-  track_num  Int
-  added_at   DateTime @default(now())
+  album_id  Int
+  song_id   Int
+  track_num Int
+  added_at  DateTime @default(now())
 
   album Album @relation(fields: [album_id], references: [album_id])
   song  Song  @relation(fields: [song_id], references: [song_id])
@@ -112,8 +110,8 @@ model SongArtist {
   song_id   Int
   artist_id Int
 
-  song  Song @relation(fields: [song_id], references: [song_id])
-  user  User @relation(fields: [artist_id], references: [user_id])
+  song Song @relation(fields: [song_id], references: [song_id])
+  user User @relation(fields: [artist_id], references: [user_id])
 
   @@id([song_id, artist_id])
 }
@@ -143,15 +141,15 @@ model UserAlbum {
 
 // Playlists
 model Playlist {
-  playlist_id   Int      @id @default(autoincrement())
-  owner_id      Int
-  playlist_name String
-  description   String?
+  playlist_id    Int      @id @default(autoincrement())
+  owner_id       Int
+  playlist_name  String
+  description    String?
   playlist_likes Int
-  created_at    DateTime @default(now())
-  updated_at    DateTime @updatedAt
+  created_at     DateTime @default(now())
+  updated_at     DateTime @updatedAt
 
-  owner         User @relation(fields: [owner_id], references: [user_id])
+  owner         User           @relation(fields: [owner_id], references: [user_id])
   playlistSongs PlaylistSong[]
   userPlaylists UserPlaylist[]
 }
@@ -181,4 +179,3 @@ model UserPlaylist {
 
   @@id([user_id, playlist_id])
 }
-
